@@ -1,11 +1,15 @@
 /**
  * transcribe.js
- * ------------
- * Handles /transcribe route.
- * - Receives audio, converts it, and transcribes with Whisper.
- * - Classifies the emotion of the transcribed text using a separate model.
- * - Uses a single, powerful AI call to generate a comprehensive
- * evaluation by synthesizing verbal content, non-verbal cues, and textual emotion.
+ * -------------
+ * Handles /transcribe route for the AI Interview Coach.
+ *
+ * Main responsibilities:
+ * - Receives audio uploads from the frontend.
+ * - Converts audio to the correct format using FFmpeg.
+ * - Transcribes speech using Whisper.
+ * - Classifies textual emotion using a BERT-based sentiment model.
+ * - Maps generic emotion labels to interview-relevant feedback.
+ * - Generates a comprehensive evaluation using a generative AI model.
  */
 
 import express from "express";
@@ -16,9 +20,11 @@ import { ffmpegPath, whisperExe, modelBin, uploadsDir } from "../utils/paths.js"
 import { cleanTranscription, runCommand } from "../utils/fileHelpers.js";
 import { genAI } from "../config/apiClients.js";
 
+// Initialize Hugging Face inference client using API token
 const hf = new HfInference(process.env.HF_ACCESS_TOKEN);
 const router = express.Router();
 
+// Map generic BERT sentiment labels to interview-relevant behavior
 const emotionMap = {
   joy: "Confident",
   love: "Confident",
@@ -28,35 +34,48 @@ const emotionMap = {
   anger: "Assertive",
 };
 
+/**
+ * classifyParagraph
+ * -----------------
+ * Performs sentence-level emotion classification using Hugging Face BERT model.
+ * Aggregates scores for each label and normalizes them to generate a dominant emotion.
+ * @param {string} text - The transcribed text from the user.
+ * @returns {object} - Object containing dominantEmotion and detailedScores.
+ */
 async function classifyParagraph(text) {
-  const sentences = text.match(/[^.!?]+[.!?]?/g) || [text];
+  const sentences = text.match(/[^.!?]+[.!?]?/g) || [text]; // Split text into sentences
   const scoreMap = {};
-  const maxRetries = 3;
+  const maxRetries = 3; // Retry mechanism in case HF API fails
 
+  // Loop through each sentence and classify its emotion
   for (const s of sentences) {
     const trimmed = s.trim();
     if (!trimmed.length) continue;
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const res = await hf.textClassification({
           model: "bhadresh-savani/bert-base-uncased-emotion",
           inputs: trimmed,
         });
+
+        // Accumulate scores for each label
         res.forEach((r) => {
           if (!scoreMap[r.label]) scoreMap[r.label] = 0;
           scoreMap[r.label] += r.score;
         });
-        break;
+        break; // Break retry loop if successful
       } catch (err) {
         if (attempt === maxRetries) {
           console.warn(`⚠️ HF API call failed for sentence: "${trimmed}". Error: ${err.message}`);
         } else {
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500)); // Wait before retry
         }
       }
     }
   }
 
+  // Normalize scores to sum up to 1
   const totalScore = Object.values(scoreMap).reduce((sum, score) => sum + score, 0);
   if (totalScore > 0) {
     for (const label in scoreMap) {
@@ -64,6 +83,7 @@ async function classifyParagraph(text) {
     }
   }
 
+  // Sort labels by descending score to get dominant emotion
   const sorted = Object.entries(scoreMap).sort((a, b) => b[1] - a[1]);
   return {
     dominantEmotion: sorted.length > 0 ? sorted[0][0] : "neutral",
@@ -71,30 +91,51 @@ async function classifyParagraph(text) {
   };
 }
 
+/**
+ * POST /
+ * ------
+ * Main endpoint to handle audio uploads and generate evaluation.
+ */
 router.post("/", async (req, res) => {
+  // Check if audio is uploaded
   if (!req.files || !req.files.audio) return res.status(400).send("No audio uploaded");
 
+  // Extract data from request body
   const { questionText, domain, experience, postureData, emotionData } = req.body || {};
   const audioFile = req.files.audio;
-  const uniqueId = Date.now() + "-" + Math.round(Math.random() * 1e9);
+  const uniqueId = Date.now() + "-" + Math.round(Math.random() * 1e9); // Unique filename
+
+  // Define paths for uploaded audio
   const webmPath = path.join(uploadsDir, `${uniqueId}-answer.webm`);
-  const wavPath = webmPath.replace(/\.[^/.]+$/, ".wav");
+  const wavPath = webmPath.replace(/\.[^/.]+$/, ".wav"); // Convert webm to wav
 
   try {
+    // Move uploaded file to backend storage
     await audioFile.mv(webmPath);
+
+    // Convert audio to WAV format using FFmpeg
     await runCommand(ffmpegPath, ["-y", "-i", webmPath, "-ar", "16000", "-ac", "1", "-acodec", "pcm_s16le", wavPath]);
+
+    // Transcribe using Whisper executable
     const whisperOutput = await runCommand(whisperExe, ["-f", wavPath, "-m", modelBin]);
     const cleanedText = cleanTranscription(whisperOutput);
 
+    // Skip evaluation if no speech detected
     if (!cleanedText) {
       return res.json({ skipEvaluation: true, message: "No speech detected." });
     }
 
+    // Perform textual emotion classification
     const textualEmotionResult = await classifyParagraph(cleanedText);
+
+    // Parse optional posture and facial emotion data
     const parsedPostureData = postureData ? JSON.parse(postureData) : null;
     const parsedEmotionData = emotionData ? JSON.parse(emotionData) : null;
+
+    // Map dominant emotion to interview-relevant label
     const mappedDominantEmotion = emotionMap[textualEmotionResult.dominantEmotion] || textualEmotionResult.dominantEmotion;
 
+    // Construct a master prompt for the generative AI evaluation
     const masterPrompt = `
       You are an elite AI interview coach. Your task is to provide a structured, precise evaluation based ONLY on the data provided.
 
@@ -133,14 +174,18 @@ router.post("/", async (req, res) => {
       }
     `;
 
+    // Call the generative AI model for evaluation
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(masterPrompt);
+
+    // Parse AI response JSON
     const rawResponseText = result.response
       .text()
       .trim()
       .replace(/```json|```/g, "");
     const aiFeedback = JSON.parse(rawResponseText);
 
+    // Respond with all evaluation data
     res.json({
       transcription: cleanedText,
       postureAnalysis: { data: parsedPostureData },
@@ -152,9 +197,11 @@ router.post("/", async (req, res) => {
       question: questionText,
     });
   } catch (err) {
+    // Catch and log any errors during processing
     console.error("Error in /transcribe route:", err);
     res.status(500).send(`Processing failed: ${err.message}`);
   } finally {
+    // Clean up temporary audio files
     fs.unlink(webmPath, () => {});
     fs.unlink(wavPath, () => {});
   }

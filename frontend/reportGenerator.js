@@ -1,7 +1,4 @@
 /**
- * reportGenerator.js
- */
-/**
  * reportGenerator.js (Narrative Layout Version)
  * --------------------------------------------------------------------------
  * Purpose:

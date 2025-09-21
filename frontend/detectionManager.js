@@ -1,4 +1,21 @@
-// detectionManager.js
+/**
+ * detectionManager.js
+ *
+ * Purpose:
+ * This module handles real-time detection of both facial expressions and body poses
+ * for the AI Interview Coach application. It initializes TensorFlow.js and Mediapipe
+ * BlazePose backends, loads necessary models, and continuously processes webcam
+ * video input to estimate user poses and emotions.
+ *
+ * Functions included:
+ * - initializeTensorFlowBackend: Sets up TensorFlow.js with the WebGL backend.
+ * - loadDetectionModels: Loads face-api.js and BlazePose models for emotion and posture detection.
+ * - runPoseDetectionLoop: Continuously estimates poses from the video element.
+ * - startDetection: Starts both pose and emotion detection loops after ensuring video readiness.
+ * - stopAllDetections: Stops all detection loops and the webcam stream to free resources.
+ *
+ * This code is critical for providing non-verbal performance feedback in mock interviews.
+ */
 async function initializeTensorFlowBackend() {
   await faceapi.tf.setBackend("webgl");
   await faceapi.tf.ready();

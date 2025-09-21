@@ -5,15 +5,7 @@
  * Purpose:
  *   Handles real-time posture detection and baseline calibration using
  *   pose keypoints (e.g., shoulders, nose, mouth). Updates UI icons/labels
- *   and logs posture data for interview analysis.
- *
- * Global Variables:
- *   - baselinePosture: stores the calibrated posture ratio
- *   - lastKeypoints: continuously updated with the latest valid pose
- *
- * Dependencies:
- *   - videoElement, canvasElement, canvasContext from main.js
- *   - currentAnswerPostures array for storing posture during recording
+ *   and logs posture data for interview analysis. *
  *
  * Core Functions:
  *   - setBaseline(): captures a stable reference posture for slouch detection
@@ -21,14 +13,6 @@
  *
  * --------------------------------------------------------------------------
  */
-/**
- * --------------------------------------------------------------------------
- * postureDetection.js
- * --------------------------------------------------------------------------
- * Handles real-time posture detection, baseline calibration, and now
- * provides real-time coaching warnings for prolonged bad posture.
- */
-
 // ----------------------
 // Global Variables
 // ----------------------

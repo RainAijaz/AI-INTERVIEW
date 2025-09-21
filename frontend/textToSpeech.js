@@ -1,4 +1,3 @@
-// textToSpeech.js
 // ----------------------
 // Text-to-Speech Utility for AI Interview Coach
 // ----------------------
@@ -10,12 +9,6 @@
 //   speak("Hello, how are you?");
 // ----------------------
 
-/**
- * Speak the provided text aloud using the browser's TTS engine.
- * Respects the "Speak Questions" toggle in the UI.
- *
- * @param {string} text - The text to be spoken.
- */
 function speak(text) {
   // Check if the "Speak Questions" toggle exists and is enabled
   const speakToggle = document.getElementById("speak-questions-toggle");
