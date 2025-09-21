@@ -1,0 +1,581 @@
+/**
+ * styles.css
+ * ----------------------
+ * Main stylesheet for AI Interview Coach Web App
+ * Includes:
+ * - Google Fonts import
+ * - Theme variables (light & dark)
+ * - Global reset & base styles
+ * - Layout, screen visibility, and header
+ * - Buttons, cards, forms
+ * - Interview and report screens
+ * - Charts and feedback panels
+ * - Notifications, animations, spinner, toggle switches
+ *
+ */
+
+/* --- Google Font --- */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
+
+/* --- CSS VARIABLES (Single Source of Truth for Design) --- */
+:root {
+  /* Light Theme (Default) */
+  --primary-accent: #1e6fbf;
+  --primary-accent-hover: #145a9e;
+  --background: #f4f7fc;
+  --surface-color: #ffffff;
+  --text-color: #2d3748;
+  --text-color-secondary: #718096;
+  --border-color: #e2e8f0;
+  --success: #28a745;
+  --error: #e63946;
+  --font-family: "Poppins", sans-serif;
+  --shadow-color: rgba(100, 100, 150, 0.1);
+  --btn-disabled-bg: #d1d5db;
+  --btn-disabled-color: #9ca3af;
+  --holistic-bg: #e7f0f7;
+}
+
+/* Dark Theme Overrides */
+body.dark-theme {
+  --primary-accent: #58a6ff;
+  --primary-accent-hover: #7fbfff;
+  --background: #1a202c;
+  --surface-color: #2d3748;
+  --text-color: #e2e8f0;
+  --text-color-secondary: #a0aec0;
+  --border-color: #4a5568;
+  --shadow-color: rgba(0, 0, 0, 0.25);
+  --btn-disabled-bg: #374151;
+  --btn-disabled-color: #6b7280;
+  --holistic-bg: #2c3a4f;
+}
+
+/* --- Global Reset & Body Styles --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--background);
+  color: var(--text-color);
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- Layout & Screen Structure --- */
+.screen {
+  display: none; /* Hidden by default */
+  width: 100%;
+  flex-grow: 1;
+  padding: 1rem 2rem 2rem;
+  overflow-y: auto;
+}
+.screen.visible {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.5s ease-in-out; /* Smooth fade in when screen appears */
+}
+
+/* --- Header & Theme Toggle --- */
+.app-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--surface-color);
+  border-bottom: 1px solid var(--border-color);
+  height: 80px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.app-header h1 {
+  font-size: 1.5rem;
+  color: var(--primary-accent);
+  margin: 0;
+}
+#theme-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-color-secondary);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 1.8rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+#theme-toggle-btn:hover {
+  transform: scale(1.1) rotate(15deg);
+  color: var(--primary-accent);
+}
+
+/* --- Cards, Buttons & Forms --- */
+.card {
+  background-color: var(--surface-color);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px -10px var(--shadow-color);
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.card-container {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+.modal-content {
+  max-width: 500px;
+  width: 100%;
+}
+.btn {
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn:focus-visible {
+  outline: 3px solid var(--primary-accent);
+  outline-offset: 2px;
+}
+.btn-primary {
+  background-color: var(--primary-accent);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--primary-accent-hover);
+  transform: translateY(-2px);
+}
+.btn:disabled {
+  background-color: var(--btn-disabled-bg);
+  color: var(--btn-disabled-color);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-accent);
+  border: 2px solid var(--primary-accent);
+}
+.btn-secondary:hover {
+  background-color: var(--primary-accent);
+  color: white;
+}
+h1,
+h2,
+h3,
+h4 {
+  color: var(--text-color);
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.5rem 0;
+}
+.form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--background);
+  color: var(--text-color);
+}
+
+/* --- Main Interview Screen --- */
+#main-interview-screen.visible {
+  overflow: hidden;
+}
+.interview-layout {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1400px;
+  height: 100%;
+  max-height: calc(100vh - 80px - 3rem);
+}
+.video-panel {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.feedback-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+}
+.video-container {
+  position: relative;
+  width: 100%;
+  flex-grow: 1;
+  background: black;
+  border-radius: 12px;
+  overflow: hidden;
+}
+#video,
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* Mirror the video feed */
+}
+#video.video-preview-style {
+  position: static;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+.controls-container {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.current-question-container p {
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
+}
+/* ADD THIS NEW RULE to your styles.css */
+
+.live-feedback-container .feedback-grid {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+.feedback-item span {
+  display: block;
+}
+.feedback-item span:first-child {
+  font-size: 2rem;
+}
+.live-feedback-container {
+  /* --- Core sticky logic --- */
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+
+  /* --- Styling for a clean look --- */
+  /* This prevents scrolling content from showing through */
+  background-color: var(--surface-color);
+
+  /* Adds a separator line from the content above */
+  border-top: 1px solid var(--border-color);
+
+  /* Provides some breathing room */
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 10;
+}
+.video-overlay.visible {
+  display: flex;
+}
+.overlay-content {
+  padding: 2rem;
+}
+
+/* --- Final Report Screen --- */
+.report-container {
+  width: 100%;
+  max-width: 1100px;
+  text-align: center;
+}
+.report-item {
+  margin-bottom: 2rem;
+  padding: 2.5rem;
+  text-align: left;
+  page-break-inside: avoid; /* Prevent page breaks inside report items */
+}
+.report-item h3 {
+  color: var(--primary-accent);
+}
+.chart-container {
+  position: relative;
+  width: 100%;
+  min-height: 350px; /* Gives the container a minimum height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Styling to match the rest of your app's theme */
+  background-color: var(--surface-color);
+  padding: 2.5rem;
+  border-radius: var(--card-radius, 16px);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+.textual-emotion-chart {
+  padding-right: 7rem;
+  padding-left: 7rem;
+}
+.chart-container h4 {
+  margin-left: 4.5rem;
+}
+
+.evaluation-details {
+  margin-top: 2.5rem;
+}
+.holistic-feedback {
+  background-color: var(--holistic-bg);
+  border-left: 5px solid var(--primary-accent);
+  padding: 1rem 1.5rem;
+  margin: 2rem 0;
+  border-radius: 8px;
+}
+.holistic-feedback h4 {
+  color: var(--primary-accent);
+  margin-top: 0;
+}
+.feedback-points {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* --- Notifications & Utility Animations --- */
+#final-report-screen.visible {
+  justify-content: flex-start;
+}
+#notification {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  padding: 15px 25px;
+  border-radius: 8px;
+  color: white;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-50px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#notification.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+#notification.success {
+  background-color: var(--success);
+}
+#notification.error {
+  background-color: var(--error);
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Report Loader & Spinner --- */
+#report-loader {
+  padding: 3rem 0;
+  text-align: center;
+}
+#report-loader p {
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  margin-top: 1rem;
+}
+.spinner {
+  border: 6px solid var(--border-color);
+  border-top: 6px solid var(--primary-accent);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* --- Toggle Switches --- */
+.toggle-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.toggle-group .toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 26px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-color);
+  outline: none;
+  border-radius: 20px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease-in-out;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.toggle-group .toggle-switch:checked {
+  background: var(--primary-accent);
+}
+.toggle-group .toggle-switch::before {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out;
+}
+.toggle-group .toggle-switch:checked::before {
+  transform: translateX(24px);
+}
+
+.report-controls {
+  display: flex;
+  justify-content: center; /* Center the buttons as a group */
+  gap: 1rem; /* Add 16px of space between the buttons */
+  margin-top: 2rem; /* Add some space above the buttons */
+}
+--- Fix for Browser Autofill in Dark Mode --- body.dark-theme input:-webkit-autofill,
+body.dark-theme input:-webkit-autofill:hover,
+body.dark-theme input:-webkit-autofill:focus,
+body.dark-theme input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text-color); /* Sets the text color */
+  box-shadow: 0 0 0px 1000px var(--bg-secondary) inset; /* Forces the background color */
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-secondary) inset; /* For older browsers */
+  transition: background-color 5000s ease-in-out 0s; /* Prevents a color flash */
+  caret-color: var(--text-color); /* Ensures the text cursor is visible */
+}
+body.dark-theme input[type="number"]::-webkit-inner-spin-button,
+body.dark-theme input[type="number"]::-webkit-outer-spin-button {
+  /* Inverts the colors of the arrows to make them visible in dark mode */
+  filter: invert(1);
+}
+.dominant-emotion-label {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 1.1em;
+}
+
+.dominant-emotion-label .highlight {
+  color: var(--primary-accent);
+  font-weight: bold;
+  /* Create a transparent background using the accent color */
+  background-color: color-mix(in srgb, var(--primary-accent) 15%, transparent);
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+/* For Chart Layout */
+.charts-wrapper {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.charts-wrapper > div {
+  flex: 1; /* Each chart container takes up half the space */
+  min-width: 0;
+}
+
+.charts-wrapper.second-row .chart-container.full-width {
+  width: 100%;
+}
+
+.dominant-emotion-label {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 1.1em;
+}
+
+.dominant-emotion-label .highlight {
+  color: #4bc0c0;
+  font-weight: bold;
+  background-color: rgba(75, 192, 192, 0.1);
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+/* For Rating Justifications */
+.ratings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rating-item .rating-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.rating-justification {
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  border-left: 2px solid var(--accent-color);
+}
+.stars {
+  padding-right: 20%;
+}
+.dominant-emotion-label {
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI Interview Coach</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="notification" class="notification"></div>
+    <header class="app-header">
+        <h1>AI Interview Coach</h1>
+        <button id="theme-toggle-btn">🌙</button>
+    </header>
+    <div id="welcome-screen" class="screen visible">
+      <div class="card-container">
+        <h1>Welcome to the AI Interview Coach</h1>
+        <p>Practice your interview skills with real-time feedback. Let's get you ready for your next big opportunity!</p>
+        <button id="get-started-btn" class="btn btn-primary">Loading AI Models...</button>
+      </div>
+    </div>
+
+    <div id="setup-screen" class="screen">
+      <div class="card-container">
+        <h2>Interview Configuration</h2>
+        <p>Tell us about the role you're practicing for.</p>
+        <div class="form-group">
+          <label for="domain">Domain:</label>
+          <input id="domain" type="text" placeholder="e.g., Frontend Development" />
+        </div>
+        <div class="form-group">
+          <label for="experience">Experience Level:</label>
+          <select id="experience">
+            <option value="Entry">Entry-Level</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+      <div class="form-group">
+        <label for="question-type">Focus on Question Types:</label>
+        <select id="question-type">
+          <option value="all" selected>All Types (Mixed)</option>
+          <option value="behavioral">Behavioral Questions Only</option>
+          <option value="technical">Technical Questions Only</option>
+          <option value="case_study">Case Study Questions Only</option>
+          <option value="practical_questions">Practical Questions Only</option>
+          <option value="competency">Competency-Based Questions Only</option>
+          <option value="strengths_weaknesses">Strengths & Weaknesses Questions Only</option>
+        </select>
+      </div>
+        <div class="form-group">
+          <label for="question-count">Number of Questions:</label>
+          <input id="question-count" type="number" value="2" min="1" max="10" />
+        </div>
+      <div class="form-group toggle-group">
+          <label for="speak-questions-toggle">Speak Questions Aloud</label>
+          <input type="checkbox" id="speak-questions-toggle" class="toggle-switch" checked>
+      </div>
+        <button id="start-session-btn" class="btn btn-primary">Start Session</button>
+      </div>
+    </div>
+
+    <div id="main-interview-screen" class="screen">
+      <div class="interview-layout">
+        <div class="video-panel">
+          <div class="video-container">
+            <video id="video" autoplay muted></video>
+            <canvas id="canvas"></canvas>
+            <div id="pre-interview-overlay" class="video-overlay visible">
+              <div class="overlay-content">
+                <h3>Calibrate Your Posture</h3>
+                <p>Please sit up straight, look at the camera, and click the button below to begin.</p>
+                <button id="set-baseline-btn" class="btn btn-primary" disabled>Set Baseline & Begin</button>
+              </div>
+            </div>
+          </div>
+          <div class="controls-container">
+            <button id="answer-btn" class="btn btn-primary" disabled>🎤 Start Answer</button>
+            <button id="end-interview-btn" class="btn btn-secondary">End Interview</button>
+          </div>
+        </div>
+
+        <div class="feedback-panel card">
+          <div class="current-question-container">
+            <h3> <span id="question-counter"></span></h3>
+            <p id="current-question-text">Waiting for you to set your baseline posture...</p>
+          </div>
+          <hr />
+          <div class="live-feedback-container">
+            <h4>Live Feedback</h4>
+            <div class="feedback-grid">
+              <div class="feedback-item">
+                <span id="emotion-emoji">😐</span>
+                <span id="emotion-label">Emotion</span>
+              </div>
+              <div class="feedback-item">
+                <span id="posture-icon">🤔</span>
+                <span id="posture-label">Posture</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div id="final-report-screen" class="screen">
+  <div class="report-container">
+    <h1>Your Interview Report</h1>
+    
+    <div id="report-loader">
+      <div class="spinner"></div>
+      <p>Generating your report...</p>
+    </div>
+    
+    <div id="report-content" style="display: none;">
+        <p>Here's a breakdown of your performance. Great job on completing the practice session!</p>
+        </div>
+
+    <div class="report-controls" style="display: none;">
+        <button id="download-report-btn" class="btn btn-secondary" disabled>📄 Download Report</button>
+        <button id="restart-interview-btn" class="btn btn-primary">Practice Again</button>
+    </div>
+  </div>
+</div>
+    </div>
+
+    <script src="frontend/vendor/tfjs-core.js"></script>
+    <script src="frontend/vendor/tfjs-backend-webgl.js"></script>
+    <script src="frontend/vendor/tfjs-converter.js"></script>
+    <script src="frontend/vendor/pose-detection.js"></script>
+    <script src="frontend/vendor/pose.js"></script>
+    <script src="frontend/vendor/face-api.min.js"></script>
+    <script src="frontend/vendor/chart.js"></script>
+    <script src="frontend/vendor/html2canvas.min.js"></script>
+    <script src="frontend/vendor/jspdf.umd.min.js"></script>
+    
+    <script src="frontend/uiController.js"></script>
+    <script src="frontend/postureDetection.js"></script>
+    <script src="frontend/emotionDetection.js"></script>
+    <script src="frontend/detectionManager.js"></script>
+    <script src="frontend/interviewManager.js"></script>
+    <script src="frontend/reportGenerator.js"></script>
+    <script src="frontend/textToSpeech.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
