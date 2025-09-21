@@ -13,8 +13,6 @@
 // - Set up the drawing canvas for rendering overlays
 // - Provide user feedback during model loading (via "Get Started" button)
 //
-// NOTE: This file does NOT handle interview flow logic. That is managed in
-// interviewManager.js. Here, we only manage the AI model and media setup.
 // ============================================================================
 
 // ------------------------------
@@ -34,8 +32,6 @@ let poseDetectionFrameId; // Animation frame ID for pose detection loop
 // ------------------------------
 // Constants
 // ------------------------------
-const FACE_API_MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model/";
-
 const EMOTION_DETECTION_INTERVAL_MS = 1000; // Emotion check every 1 second
 
 // ------------------------------

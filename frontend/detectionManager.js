@@ -3,13 +3,13 @@ async function initializeTensorFlowBackend() {
   await faceapi.tf.setBackend("webgl");
   await faceapi.tf.ready();
 }
-
+const FACE_API_MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model/";
 async function loadDetectionModels() {
   await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(FACE_API_MODEL_URL), faceapi.nets.faceExpressionNet.loadFromUri(FACE_API_MODEL_URL)]);
   await new Promise((resolve) => setTimeout(resolve, 500));
   const model = poseDetection.SupportedModels.BlazePose;
   const detectorConfig = {
-    runtime: "mediapipe", 
+    runtime: "mediapipe",
     solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/pose", // Tell it where to find the files
     modelType: "lite",
   };
